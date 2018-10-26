@@ -1,0 +1,29 @@
+{
+    "title": "Proxy-test input",
+    "type": "object",
+    "schemaVersion": 1,
+    "required": ["testUrls", "proxy"],
+    "properties": {
+        "testUrls": {
+            "title": "Test URLs",
+            "type": "array",
+            "description": "Enter URLs on which you want test to be performed",
+            "editor": "requestListSources",
+            "prefill": [
+                { "url": "https://example.com" }
+            ]
+        },
+        "proxy": {
+            "title": "Proxy configuration",
+            "type": "object",
+            "editor": "proxy",
+            "description": "Select apify proxy groups or custom proxies you want to test"
+        },
+        "plainHttpRequest": {
+            "title": "Use plain HTTP request",
+            "type": "boolean",
+            "description": "If checked then simple HTTP request will be send instead of full Chrome browser.",
+            "default": false
+        }
+    }
+}

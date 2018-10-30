@@ -1,7 +1,8 @@
 FROM apify/actor-node-chrome
 
 # Copy source code
-COPY * src ./
+COPY * ./
+COPY src/* ./
 
 # Install default dependencies, print versions of everything
 RUN npm --quiet set progress=false \

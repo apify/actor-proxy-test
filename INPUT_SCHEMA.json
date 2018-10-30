@@ -19,11 +19,19 @@
             "editor": "proxy",
             "description": "Select apify proxy groups or custom proxies you want to test"
         },
+        "timeoutSecs": {
+            "title": "Timeout",
+            "type": "integer",
+            "default": 120,
+            "unit": "secs",
+            "description": "Timeout for page.goto() or request in seconds"
+        },
         "plainHttpRequest": {
             "title": "Use plain HTTP request",
             "type": "boolean",
             "description": "If checked then simple HTTP request will be send instead of full Chrome browser.",
-            "default": false
+            "default": false,
+            "groupCaption": "Options"
         }
     }
 }

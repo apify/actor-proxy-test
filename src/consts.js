@@ -1,0 +1,1 @@
+exports.REFRESH_INTERVAL_SECS = 1;

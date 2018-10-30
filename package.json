@@ -1,11 +1,12 @@
 {
 	"name": "proxy-test",
 	"version": "1.0.0",
-	"description": "Crawl a number of web pages using headless Chrome and Puppeteer",
-	"main": "main.js",
+	"description": "Test websites against Apify proxy groups and your proxy URLs.",
+	"main": "src/main.js",
 	"dependencies": {
 		"apify": "^0.8.0",
 		"bluebird": "^3.5.2",
+		"express": "^4.16.4",
 		"request-promise": "^4.2.2",
 		"underscore": "^1.9.1",
 		"uuid": "^3.3.2"

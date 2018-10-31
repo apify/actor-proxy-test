@@ -10,7 +10,7 @@ const { APIFY_DEFAULT_KEY_VALUE_STORE_ID } = process.env;
  * @return {String}
  */
 const renderUrlResult = ({ url, htmlStoreKey, statusCode, contentType, durationSecs, screenshot, error }) => {
-    if (error) return `<h6>${url}</h6><p>Error: ${error}</p>`;
+    if (error) return `<h6>${url}</h6><p><code>Error: ${error && error.stack ? error.stack : error}</code></p>`;
 
     let screenshotHtml;
 

@@ -1,6 +1,7 @@
 const Apify = require('apify');
 const rp = require('request-promise');
 const uuidv1 = require('uuid/v1');
+const { NO_PROXY } = require('./consts');
 
 /**
  * Takes a screenshot. In a case of an error, catches it and returns error in result object.
@@ -32,22 +33,22 @@ const getScreenshot = async (page) => {
  * @return {Promise}
  */
 exports.runPlainHttpTest = async (request, { timeoutSecs }) => {
+    const startedAt = Date.now();
     const htmlStoreKey = uuidv1();
     const { proxyUrl, proxyTitle } = request.userData;
+    const opts = {
+        url: request.url,
+        method: request.method,
+        headers: request.headers,
+        resolveWithFullResponse: true,
+        timeout: timeoutSecs * 1000,
+    };
+    if (proxyUrl !== NO_PROXY) opts.proxy = proxyUrl;
 
     console.log(`- testing ${request.url} with proxy URL ${proxyUrl}`);
 
-    const startedAt = Date.now();
-
     try {
-        const response = await rp({
-            url: request.url,
-            method: request.method,
-            headers: request.headers,
-            proxy: proxyUrl,
-            resolveWithFullResponse: true,
-            timeout: timeoutSecs * 1000,
-        });
+        const response = await rp(opts);
 
         await Apify.setValue(htmlStoreKey, response.body, { contentType: 'text/html; charset=utf-8' });
 
@@ -79,22 +80,26 @@ exports.runPlainHttpTest = async (request, { timeoutSecs }) => {
 exports.browserTest = async (request, { timeoutSecs }) => {
     const htmlStoreKey = uuidv1();
     const { proxyUrl, proxyTitle } = request.userData;
+    const opts = {};
+
+    if (proxyUrl !== NO_PROXY) opts.proxyUrl = proxyUrl;
 
     console.log(`- testing ${request.url} with proxy URL ${proxyUrl}`);
 
     try {
-        const browser = await Apify.launchPuppeteer({ proxyUrl });
+        const browser = await Apify.launchPuppeteer(opts);
         const page = await browser.newPage();
         const startedAt = Date.now();
         const response = await page.goto(request.url, { timeout: timeoutSecs * 1000 });
         const screenshot = await getScreenshot(page);
         const html = await page.$eval('html', (el) => el.outerHTML);
         await Apify.setValue(htmlStoreKey, html, { contentType: 'text/html; charset=utf-8' });
+
         const data = {
             url: request.url,
             htmlStoreKey,
             statusCode: response.status(),
-            contentType: response.headers().contentType,
+            contentType: response.headers()['content-type'],
             durationSecs: (Date.now() - startedAt) / 1000,
             screenshot,
             proxyTitle,

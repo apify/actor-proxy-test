@@ -5,7 +5,7 @@ const EventEmitter = require('events');
 const { renderResult } = require('./result_renderer');
 const { runPlainHttpTest, browserTest } = require('./test_runner');
 const { startWebServer } = require('./web_server');
-const { REFRESH_INTERVAL_SECS } = require('./consts');
+const { REFRESH_INTERVAL_SECS, NO_PROXY } = require('./consts');
 
 const {
     APIFY_CONTAINER_PORT,
@@ -41,7 +41,7 @@ Apify.main(async () => {
             });
         }
     } else {
-        safeProxyUrls[null] = 'No proxy'; // eslint-disable-line
+        safeProxyUrls[NO_PROXY] = 'No proxy'; // eslint-disable-line
     }
 
     // Create a request list from pairs proxy URL + test URL.

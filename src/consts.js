@@ -1,1 +1,2 @@
 exports.REFRESH_INTERVAL_SECS = 1;
+exports.NO_PROXY = 'NO_PROXY';

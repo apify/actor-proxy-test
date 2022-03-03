@@ -17,7 +17,7 @@
             "title": "Proxy configuration",
             "type": "object",
             "editor": "proxy",
-            "prefill": { "useApifyProxy": true }
+            "prefill": { "useApifyProxy": true },
             "description": "Select apify proxy groups or custom proxies you want to test"
         },
         "timeoutSecs": {

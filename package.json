@@ -4,25 +4,28 @@
 	"description": "Test websites against Apify proxy groups and your proxy URLs.",
 	"main": "src/main.js",
 	"dependencies": {
-		"apify": "^0.8.0",
-		"bluebird": "^3.5.2",
-		"express": "^4.16.4",
+		"@apify/eslint-config": "^0.3.1",
+		"@apify/log": "^2.2.11",
+		"apify": "^3",
+		"crawlee": "^3",
+		"express": "^4.18.2",
+		"puppeteer": "~19.8.5",
 		"request-promise": "^4.2.2",
-		"underscore": "^1.9.1",
-		"uuid": "^3.3.2"
+		"underscore": "^1.13.6",
+		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
-		"eslint": "^5.7.0",
-		"eslint-config-airbnb": "^17.0.0",
-		"eslint-config-airbnb-base": "^13.0.0",
-		"eslint-plugin-import": "^2.13.0",
-		"eslint-plugin-jsx-a11y": "^6.1.1",
-		"eslint-plugin-promise": "^4.0.1",
-		"eslint-plugin-react": "^7.10.0"
+		"eslint": "^8.38.0",
+		"eslint-config-airbnb": "^19.0.4",
+		"eslint-config-airbnb-base": "^15.0.0",
+		"eslint-plugin-import": "^2.27.5",
+		"eslint-plugin-jsx-a11y": "^6.7.1",
+		"eslint-plugin-promise": "^6.1.1",
+		"eslint-plugin-react": "^7.32.2"
 	},
 	"scripts": {
 		"start": "node src/main.js",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"lint": "eslint ."
 	},
 	"repository": {
 		"type": "git",

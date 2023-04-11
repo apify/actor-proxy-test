@@ -1,6 +1,8 @@
-const Apify = require('apify');
+const { Actor } = require('apify');
+const log = require('@apify/log').default;
+const { launchPuppeteer } = require('crawlee');
 const rp = require('request-promise');
-const uuidv1 = require('uuid/v1');
+const { v1: uuidv1 } = require('uuid');
 const { NO_PROXY } = require('./consts');
 
 /**
@@ -16,7 +18,7 @@ const getScreenshot = async (page) => {
 
     try {
         buffer = await page.screenshot({ type: 'jpeg', quality: 50 });
-        await Apify.setValue(storeKey, buffer, { contentType: 'image/jpeg' });
+        await Actor.setValue(storeKey, buffer, { contentType: 'image/jpeg' });
     } catch (err) {
         error = err;
     }
@@ -45,12 +47,12 @@ exports.runPlainHttpTest = async (request, { timeoutSecs }) => {
     };
     if (proxyUrl !== NO_PROXY) opts.proxy = proxyUrl;
 
-    console.log(`- testing ${request.url} with proxy URL ${proxyUrl}`);
+    log.info(`testing ${request.url} with proxy URL ${proxyUrl}`);
 
     try {
         const response = await rp(opts);
 
-        await Apify.setValue(htmlStoreKey, response.body, { contentType: 'text/html; charset=utf-8' });
+        await Actor.setValue(htmlStoreKey, response.body, { contentType: 'text/html; charset=utf-8' });
 
         return {
             url: request.url,
@@ -84,16 +86,16 @@ exports.browserTest = async (request, { timeoutSecs }) => {
 
     if (proxyUrl !== NO_PROXY) opts.proxyUrl = proxyUrl;
 
-    console.log(`- testing ${request.url} with proxy URL ${proxyUrl}`);
+    log.info(`Testing ${request.url} with proxy URL ${proxyUrl}`);
 
     try {
-        const browser = await Apify.launchPuppeteer(opts);
+        const browser = await launchPuppeteer(opts);
         const page = await browser.newPage();
         const startedAt = Date.now();
         const response = await page.goto(request.url, { timeout: timeoutSecs * 1000 });
         const screenshot = await getScreenshot(page);
         const html = await page.$eval('html', (el) => el.outerHTML);
-        await Apify.setValue(htmlStoreKey, html, { contentType: 'text/html; charset=utf-8' });
+        await Actor.setValue(htmlStoreKey, html, { contentType: 'text/html; charset=utf-8' });
 
         const data = {
             url: request.url,

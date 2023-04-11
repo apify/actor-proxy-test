@@ -1,11 +1,12 @@
-const Apify = require('apify');
-const uuidv1 = require('uuid/v1');
+const { Actor } = require('apify');
+const { BasicCrawler, RequestList } = require('crawlee');
+const { v1: uuidv1 } = require('uuid');
 const _ = require('underscore');
 const EventEmitter = require('events');
 const { renderResult } = require('./result_renderer');
 const { runPlainHttpTest, browserTest } = require('./test_runner');
 const { startWebServer } = require('./web_server');
-const { REFRESH_INTERVAL_SECS, NO_PROXY } = require('./consts');
+const { NO_PROXY } = require('./consts');
 
 const {
     APIFY_CONTAINER_PORT,
@@ -13,8 +14,8 @@ const {
     APIFY_MEMORY_MBYTES,
 } = process.env;
 
-Apify.main(async () => {
-    const input = await Apify.getValue('INPUT');
+Actor.main(async () => {
+    const input = await Actor.getInput();
     const { testUrls, plainHttpRequest } = input;
     const { useApifyProxy, apifyProxyGroups, proxyUrls, timeoutSecs } = input.proxy;
     const testFunction = plainHttpRequest ? runPlainHttpTest : browserTest;
@@ -33,15 +34,17 @@ Apify.main(async () => {
         });
     } else if (useApifyProxy) {
         if (!apifyProxyGroups || !apifyProxyGroups.length) {
-            safeProxyUrls[Apify.getApifyProxyUrl()] = 'Apify proxy (auto)';
+            const proxyConfiguration = await Actor.createProxyConfiguration(input.proxy);
+            safeProxyUrls[await proxyConfiguration.newUrl()] = 'Apify proxy (auto)';
         } else {
-            apifyProxyGroups.forEach((group) => {
-                const proxyUrl = Apify.getApifyProxyUrl({ groups: [group] });
-                safeProxyUrls[proxyUrl] = `Apify proxy (${group})`;
-            });
+            for (const group of apifyProxyGroups) {
+                input.proxy.apifyProxyGroups = [group];
+                const proxyConfiguration = await Actor.createProxyConfiguration(input.proxy);
+                safeProxyUrls[await proxyConfiguration.newUrl()] = `Apify proxy (${group})`;
+            }
         }
     } else {
-        safeProxyUrls[NO_PROXY] = 'No proxy'; // eslint-disable-line
+        safeProxyUrls[NO_PROXY] = 'No proxy';
     }
 
     // Create a request list from pairs proxy URL + test URL.
@@ -51,16 +54,15 @@ Apify.main(async () => {
         testUrls.forEach((request) => {
             const userData = { proxyTitle, proxyUrl };
             const uniqueKey = uuidv1();
-            sources.push(Object.assign({}, request, { userData, uniqueKey, headers: {} }));
+            sources.push({ ...request, userData, uniqueKey, headers: {} });
         });
     });
 
     // Scrape request list using BasicCrawler to have a full controll over browsers.
-    const requestList = new Apify.RequestList({ sources });
-    await requestList.initialize();
-    const crawler = new Apify.BasicCrawler({
+    const requestList = await RequestList.open({ sources });
+    const crawler = new BasicCrawler({
         requestList,
-        handleRequestFunction: async ({ request }) => {
+        requestHandler: async ({ request }) => {
             const result = await testFunction(request, { timeoutSecs });
             results.push(result);
             resultsEmitter.emit('results', results, true);
@@ -70,10 +72,7 @@ Apify.main(async () => {
     await crawler.run();
     resultsEmitter.emit('results', results, false);
 
-    // Wait for a clients to refresh page.
-    await Apify.utils.sleep(REFRESH_INTERVAL_SECS * 1000 * 3);
-
     // Render result HTML and save it to key-value store.
     const html = renderResult(results);
-    await Apify.setValue('OUTPUT', html, { contentType: 'text/html; charset=utf-8' });
+    await Actor.setValue('OUTPUT', html, { contentType: 'text/html; charset=utf-8' });
 });

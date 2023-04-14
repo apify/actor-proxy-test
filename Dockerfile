@@ -1,4 +1,4 @@
-FROM apify/actor-node-chrome
+FROM apify/actor-node-puppeteer-chrome:16
 
 # Copy source code
 COPY . ./

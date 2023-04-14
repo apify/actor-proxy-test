@@ -1,3 +1,4 @@
+const log = require('@apify/log').default;
 const express = require('express');
 const { renderResult, renderPage } = require('./result_renderer');
 
@@ -33,6 +34,6 @@ exports.startWebServer = (port, url, resultsEmitter) => {
     });
 
     app.listen(port, () => {
-        console.log(`Application is listening at URL ${url}.`);
+        log.info(`Application is listening at URL ${url}.`);
     });
 };
